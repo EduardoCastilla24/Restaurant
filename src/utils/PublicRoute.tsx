@@ -1,14 +1,23 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { useAuthStore } from "@/store/AuthStore";
+import { useAuthStore } from "@/store/auth.store";
 
 export const PublicRoute = () => {
-    const { isAuthenticated, isLoading } = useAuthStore();
+    const { user, loading } = useAuthStore();
 
-    if (isLoading) return null; // O spinner
+    // Auth aún inicializando
+    if (loading) {
+        return (
+            <div className="h-screen w-full flex items-center justify-center">
+                Cargando...
+            </div>
+        );
+    }
 
-    if (isAuthenticated) {
+    // Ya autenticado → fuera de login
+    if (user) {
         return <Navigate to="/dashboard" replace />;
     }
 
+    // Público OK
     return <Outlet />;
 };

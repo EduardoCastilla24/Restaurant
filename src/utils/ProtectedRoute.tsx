@@ -1,33 +1,59 @@
-import { Navigate, Outlet } from "react-router-dom";
-import { useAuthStore } from "@/store/AuthStore";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { useAuthStore } from "@/store/auth.store";
 import { AppRole } from "@/types/auth.types";
 
 interface ProtectedRouteProps {
-  allowedRoles?: AppRole[]; // Roles permitidos para esta ruta
+  allowedRoles?: AppRole[];
 }
 
 export const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
-  const { isAuthenticated, isLoading, profile } = useAuthStore();
+  const location = useLocation();
 
-  if (isLoading) {
-    // Puedes poner aquí un componente <LoadingSpinner /> bonito de Shadcn
+  const {
+    user,
+    profile,
+    loading,
+  } = useAuthStore();
+
+  // 1️⃣ Auth aún inicializando
+  if (loading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      <div className="h-screen w-full flex items-center justify-center">
+        Cargando...
       </div>
     );
   }
 
-  // 1. Si no está autenticado, fuera
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+  // 2️⃣ No autenticado
+  if (!user) {
+    return (
+      <Navigate
+        to="/login"
+        replace
+        state={{ from: location }}
+      />
+    );
   }
 
-  // 2. Si la ruta requiere roles específicos y el usuario no lo tiene
-  if (allowedRoles && profile && !allowedRoles.includes(profile.role)) {
-    return <Navigate to="/unauthorized" replace />; // O redirigir al dashboard
+  // 3️⃣ Perfil no cargado (ERROR REAL)
+  if (!profile) {
+    return (
+      <div className="h-screen w-full flex items-center justify-center text-red-500">
+        Error: perfil de usuario no disponible
+      </div>
+    );
   }
 
-  // 3. Todo OK
+  // 4️⃣ Usuario desactivado
+  if (!profile.is_active) {
+    return <Navigate to="/inactive-user" replace />;
+  }
+
+  // 5️⃣ Control de roles
+  if (allowedRoles && !allowedRoles.includes(profile.role)) {
+    return <Navigate to="/unauthorized" replace />;
+  }
+
+  // 6️⃣ OK
   return <Outlet />;
 };

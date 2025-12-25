@@ -1,55 +1,49 @@
-import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useAuthStore } from "@/store/AuthStore";
+
 import { ProtectedRoute } from "@/utils/ProtectedRoute";
 import { PublicRoute } from "@/utils/PublicRoute";
 
-// Importa tus páginas
+// Pages
 import LoginPage from "@/pages/auth/Login";
-// import DashboardPage from "@/pages/DashboardPage";
-// import KitchenPage from "@/pages/KitchenPage";
-// import UnauthorizedPage from "@/pages/UnauthorizedPage";
+import DashboardPage from "@/pages/admin/Dashboard";
 
-function App() {
-  const initializeAuth = useAuthStore((state) => state.initializeAuth);
-
-  // Inicializar el listener de Supabase al cargar la app
-  useEffect(() => {
-    initializeAuth();
-  }, [initializeAuth]);
-
+export default function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Rutas Públicas (Login) */}
+
+        {/* ================= PUBLIC ================= */}
         <Route element={<PublicRoute />}>
           <Route path="/login" element={<LoginPage />} />
         </Route>
 
-        {/* Rutas Protegidas */}
-
-        {/* A. Rutas para CUALQUIER usuario logueado */}
-        <Route element={<ProtectedRoute />}>
-          {/* <Route path="/unauthorized" element={<UnauthorizedPage />} /> */}
+        {/* ================= PROTECTED ================= */}
+        <Route
+          element={
+            <ProtectedRoute allowedRoles={["admin", "superadmin"]} />
+          }
+        >
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Route>
 
-        {/* B. Rutas SOLO para ADMIN y SUPERADMIN */}
-        <Route element={<ProtectedRoute allowedRoles={['admin', 'superadmin']} />}>
-          {/* <Route path="/dashboard" element={<DashboardPage />} /> */}
-          {/* <Route path="/admin/users" element={<UsersPage />} /> */}
-        </Route>
+        {/* ================= EXTRA ================= */}
+        <Route
+          path="/unauthorized"
+          element={<div>No tienes permisos</div>}
+        />
 
-        {/* C. Rutas para COCINA */}
-        <Route element={<ProtectedRoute allowedRoles={['kitchen', 'admin', 'superadmin']} />}>
-          {/* <Route path="/kitchen" element={<KitchenPage />} /> */}
-        </Route>
+        <Route
+          path="/inactive-user"
+          element={<div>Usuario inactivo</div>}
+        />
 
-        {/* Ruta por defecto */}
-        <Route path="*" element={<Navigate to="/login" />} />
+        <Route
+          path="*"
+          element={<div>Página no encontrada</div>}
+        />
 
       </Routes>
     </BrowserRouter>
   );
 }
-
-export default App;
