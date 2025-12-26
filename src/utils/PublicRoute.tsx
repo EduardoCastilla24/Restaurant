@@ -6,18 +6,13 @@ export const PublicRoute = () => {
     const { user, loading } = useAuthStore();
 
     if (loading) {
-        return (
-            <div className="h-screen flex items-center justify-center">
-                Cargando...
-            </div>
-        );
+        return <div>Cargando...</div>;
     }
 
-    // 🚀 SI YA ESTÁ LOGEADO → REDIRIGE
     if (user) {
-        console.log("PublicRoute: usuario logeado, redirigiendo...");
         return <Navigate to="/dashboard" replace />;
     }
 
     return <Outlet />;
 };
+

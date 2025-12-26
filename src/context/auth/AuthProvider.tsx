@@ -7,12 +7,10 @@ import type { UserProfile } from "@/types/auth.types";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const initialized = useRef(false);
+    const profileFetched = useRef(false);
 
     const { setAuth, clearAuth, setLoading } = useAuthStore();
 
-    // ============================
-    // FETCH PROFILE
-    // ============================
     const fetchProfile = useCallback(async (userId: string) => {
         const { data, error } = await supabase
             .from("profiles")
@@ -28,9 +26,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return data as UserProfile;
     }, []);
 
-    // ============================
-    // HANDLE SESSION
-    // ============================
     const handleSession = useCallback(
         async (session: Session | null) => {
             if (!session?.user) {
@@ -38,10 +33,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 return;
             }
 
-            // usuario inmediato (no bloquea navegación)
+            // usuario inmediato
             setAuth(session, session.user, null);
 
-            // perfil async
+            // ⛔ evita doble fetch
+            if (profileFetched.current) return;
+            profileFetched.current = true;
+
             const profile = await fetchProfile(session.user.id);
             if (profile) {
                 setAuth(session, session.user, profile);
@@ -50,9 +48,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         [clearAuth, setAuth, fetchProfile]
     );
 
-    // ============================
-    // INIT AUTH
-    // ============================
     useEffect(() => {
         if (initialized.current) return;
         initialized.current = true;
@@ -74,11 +69,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             data: { subscription },
         } = supabase.auth.onAuthStateChange((event, session) => {
             if (event === "SIGNED_OUT") {
+                profileFetched.current = false;
                 clearAuth();
+                setLoading(false);
                 return;
             }
 
-            if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+            if (event === "SIGNED_IN") {
+                profileFetched.current = false; // nuevo login
                 handleSession(session);
             }
         });
@@ -86,10 +84,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return () => subscription.unsubscribe();
     }, [handleSession, clearAuth, setLoading]);
 
-    // ============================
-    // SIGN OUT
-    // ============================
     const signOut = async () => {
+        profileFetched.current = false;
         await supabase.auth.signOut();
         clearAuth();
     };
