@@ -10,7 +10,7 @@ type Props = {
     description?: string;
 }
 
-function Layout({ children, title, description }: Props) {
+function Layout({ children, title }: Props) {
     const { user } = useAuth();
 
     return (
@@ -29,7 +29,7 @@ function Layout({ children, title, description }: Props) {
                             <h1 className="text-3xl font-bold tracking-tight text-foreground">{title}</h1>
                             <SidebarTrigger className="block xl:hidden"></SidebarTrigger>
                         </div>
-                        <p className="text-muted-foreground text-sm text-start">{description}</p>
+                        {/* <p className="text-muted-foreground text-sm text-start">{description}</p> */}
                     </header>
                     {children}
                 </section>

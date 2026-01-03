@@ -1,6 +1,6 @@
 
 import { useNavigate } from "react-router-dom"
-import { UserCog, LogOut, Calendar, Clipboard, ChartArea } from "lucide-react"
+import { LogOut, HandPlatter, ChartArea, Utensils, ScanBarcode, UserCog, TicketPercent } from "lucide-react"
 import { useLocation, Link } from "react-router-dom"
 import {
     Sidebar,
@@ -26,21 +26,33 @@ const items = [
         roles: ["admin", "superadmin",],
     },
     {
-        title: "Calendario",
-        url: "/calendario",
-        icon: Calendar,
-        roles: ["admin", "superadmin",],
-    },
-    {
-        title: "Pacientes",
-        url: "/pacientes",
+        title: "Usuarios",
+        url: "/usuarios",
         icon: UserCog,
         roles: ["admin", "superadmin",],
     },
     {
-        title: "Historial Clínico",
-        url: "/historial",
-        icon: Clipboard,
+        title: "Mesas",
+        url: "/mesas",
+        icon: HandPlatter,
+        roles: ["admin", "superadmin",],
+    },
+    {
+        title: "Platillos",
+        url: "/platillos",
+        icon: Utensils,
+        roles: ["admin", "superadmin",],
+    },
+    {
+        title: "POS",
+        url: "/pos",
+        icon: ScanBarcode,
+        roles: ["admin", "superadmin",],
+    },
+    {
+        title: "Ordenes",
+        url: "/ordernes",
+        icon: TicketPercent,
         roles: ["admin", "superadmin",],
     },
 ]
@@ -64,7 +76,7 @@ export function AppSidebar() {
     const filteredItems = items.filter(item =>
         item.roles.includes(profile.role)
     );
-    
+
     return (
 
         <Sidebar className="p-2 py-6 shadow-sm border bg-white rounded-r-3xl min-h-[calc(100dvh-10rem)] flex flex-col justify-between">
